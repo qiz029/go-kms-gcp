@@ -64,7 +64,9 @@ func StoreCmk(cmk_id int, cmk_name string, expire_date string) bool {
 }
 
 func StoreKek(project_id int, encrypted_key string, cmk_id int) bool {
-	storeStmt, err := db.Prepare("INSERT INTO public.keks VALUES(?, ?, ?)")
+	storeStmt, err := db.Prepare("INSERT INTO public.keks(" +
+		"project_id, cmk_id, encrypted_key)" +
+		"VALUES ($1, $2, $3);")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -90,4 +92,19 @@ func GetCmk(cmk_id int) string {
 	}
 	return cmk_name
 
+}
+
+func GetKek(cmk_id int, pid int) string {
+	encrypted_key_row, err1 := db.Query("SELECT encrypted_key FROM public.keks WHERE cmk_id=$1 AND project_id=$2;", cmk_id, pid)
+	if err1 != nil {
+		panic(err1.Error())
+	}
+	var encrypted_kek string
+	encrypted_key_row.Next()
+	encrypted_key_row.Scan(&encrypted_kek)
+
+	if encrypted_kek == "" {
+		return ""
+	}
+	return encrypted_kek
 }

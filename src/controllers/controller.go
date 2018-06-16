@@ -42,10 +42,10 @@ func Decrypt(c echo.Context) error {
 
 func EncryptCustom(c echo.Context) error {
 	pid := c.Param("pid")
-	// pid_int, err := strconv.Atoi(pid)
-	// if err != nil {
-	// 	panic(err)
-	// }
+	pid_int, err := strconv.Atoi(pid)
+	if err != nil {
+		panic(err)
+	}
 	cid := c.Param("cid")
 	cid_int, err1 := strconv.Atoi(cid)
 	if err1 != nil {
@@ -58,12 +58,16 @@ func EncryptCustom(c echo.Context) error {
 	if err2 != nil {
 		panic(err2.Error())
 	}
-	encryptedPayload := logic.ConcateEncrypt_cmk(key[:], string(body), cid_int)
+	encryptedPayload := logic.ConcateEncrypt_cmk(key[:], string(body), cid_int, pid_int)
 	return c.String(http.StatusOK, encryptedPayload)
 }
 
 func DecryptCustom(c echo.Context) error {
 	pid := c.Param("pid")
+	pid_int, err := strconv.Atoi(pid)
+	if err != nil {
+		panic(err)
+	}
 	cid := c.Param("cid")
 	cid_int, err1 := strconv.Atoi(cid)
 	if err1 != nil {
@@ -75,7 +79,7 @@ func DecryptCustom(c echo.Context) error {
 	if err != nil {
 		panic(err.Error())
 	}
-	payload, err2 := logic.ConcateDecrypt_cmk(string(body), cid_int)
+	payload, err2 := logic.ConcateDecrypt_cmk(string(body), cid_int, pid_int)
 	if err2 != nil {
 		return c.String(http.StatusNotFound, "The cmk is not found")
 	}
